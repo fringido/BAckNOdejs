@@ -1,7 +1,6 @@
 const faker = require('faker');
-const boom = require('@hapi/boom');
 
-class ProductService {
+class ProductsService {
   constructor() {
     this.products = [];
     this.generate();
@@ -15,40 +14,49 @@ class ProductService {
         name: faker.commerce.productName(),
         price: parseInt(faker.commerce.price(), 10),
         image: faker.image.imageUrl(),
+        isBlock: faker.datatype.boolean(),
       });
     }
   }
 
-  // CRUD
   async create(data) {
     const newProduct = {
       id: faker.datatype.uuid(),
       ...data,
     };
-    this.products.push(newProduct);
-    return newProduct;
+    try {
+      this.products.push(newProduct);
+      return newProduct;
+    } catch (err) {
+      throw boom.badImplementation('Error creating product', err);
+    }
   }
 
-  async find() {
-    return new Promise((resolve, reject) => {
+  find() {
+    return new Promise((resolve) => {
       setTimeout(() => {
-        resolve(this.products)
-      }, 5000)
-    })
+        resolve(this.products);
+      }, 3000);
+    });
   }
+
   async findOne(id) {
     const product = this.products.find((item) => item.id === id);
     if (!product) {
-      throw boom.notFound('Product not found');
+      throw boom.notFound('product not found');
     }
+    if (product.isBlock) {
+      throw boom.conflict('product is block');
+    }
+    return product;
   }
+
 
   async update(id, changes) {
     const index = this.products.findIndex((item) => item.id === id);
     if (index === -1) {
-      throw boom.notFound('Product not found');
+      throw boom.notFound('product not found');
     }
-
     const product = this.products[index];
     this.products[index] = {
       ...product,
@@ -60,15 +68,11 @@ class ProductService {
   async delete(id) {
     const index = this.products.findIndex((item) => item.id === id);
     if (index === -1) {
-
-      throw boom.notFound('Product not found');
+      throw boom.notFound('product not found');
     }
     this.products.splice(index, 1);
-    return {
-      message: 'deleted',
-      id,
-    };
+    return { id };
   }
 }
 
-module.exports = ProductService;
+module.exports = ProductsService;
