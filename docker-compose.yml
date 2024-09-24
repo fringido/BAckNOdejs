@@ -1,13 +1,23 @@
-version: '3.3'
+version: "3.8"
 
 services:
   postgres:
-    image: postgres:13
+    image: postgres:latest
+    restart: always
+    container_name: my_container_db
     environment:
-      - POSTGRES_DB=my_store
-      - POSTGRES_USER=max
-      - POSTGRES_PASSWORD=max123
+      POSTGRES_DB: my_store
+      POSTGRES_USER: max
+      POSTGRES_PASSWORD: admin123
     ports:
       - 5432:5432
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data
+      - /postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - 5050:80
